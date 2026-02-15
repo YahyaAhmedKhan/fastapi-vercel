@@ -1,5 +1,7 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request, Query
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from datetime import datetime
+import os
 
 
 app = FastAPI(
@@ -9,17 +11,6 @@ app = FastAPI(
 )
 
 
-@app.get("/api/data")
-def get_sample_data():
-    return JSONResponse({
-        "data": [
-            {"id": 1, "name": "Sample Item 1", "value": 100},
-            {"id": 2, "name": "Sample Item 2", "value": 200},
-            {"id": 3, "name": "Sample Item 3", "value": 300}
-        ],
-        "total": 3,
-        "timestamp": "2024-01-01T00:00:00Z"
-    })
 
 
 @app.get("/", response_class=JSONResponse)
@@ -27,6 +18,44 @@ def read_root():
     return JSONResponse({
         "message": "Hello, World!"
     })
+
+
+@app.get("/webhook", response_class=PlainTextResponse)
+async def verify_webhook(
+    mode: str = Query(alias="hub.mode"),
+    token: str = Query(alias="hub.verify_token"),
+    challenge: str = Query(alias="hub.challenge")
+):
+    """
+    WhatsApp webhook verification endpoint.
+    Meta will call this to verify your webhook URL.
+    """
+    # You should replace this with your actual verify token
+    VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
+    
+    if mode == "subscribe" and token == VERIFY_TOKEN:
+        return challenge
+    else:
+        return PlainTextResponse("Forbidden", status_code=403)
+
+
+@app.post("/webhook")
+async def receive_webhook(request: Request):
+    """
+    WhatsApp webhook endpoint for receiving messages and events.
+    """
+    try:
+        body = await request.json()
+        response = JSONResponse({
+            "status": "success",
+            "body": body,
+            "timestamp": datetime.now().isoformat()
+        }, status_code=200)
+    
+    except Exception as e:
+        print(f"Error processing webhook: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
 
 if __name__ == "__main__":
     import uvicorn
