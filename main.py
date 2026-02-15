@@ -21,6 +21,7 @@ def get_sample_data():
         "timestamp": "2024-01-01T00:00:00Z"
     })
 
+
 @app.get("/", response_class=JSONResponse)
 def read_root():
     return JSONResponse({
