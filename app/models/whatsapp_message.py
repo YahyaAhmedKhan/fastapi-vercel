@@ -58,6 +58,12 @@ class WhatsAppMessageValue(BaseModel):
     contacts: list[WhatsAppMessageContact]
     messages: list[WhatsAppMessage]
     
-class WhatsAppMessagePayload(BaseModel):
+class WhatsAppMessageChanges(BaseModel):
     field: str
     value: WhatsAppMessageValue
+class WhatsAppMessageEntry(BaseModel):
+    id: str
+    changes: list[WhatsAppMessageChanges]
+class WhatsAppMessagePayload(BaseModel):
+    object: str
+    entry: list[WhatsAppMessageEntry]
