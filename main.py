@@ -31,7 +31,7 @@ async def verify_webhook(
     Meta will call this to verify your webhook URL.
     """
     # You should replace this with your actual verify token
-    VERIFY_TOKEN = 98765
+    VERIFY_TOKEN = "98765"
     
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return challenge
